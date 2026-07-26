@@ -29,7 +29,7 @@ const registerRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   homeRoute,
   loginRoute,
-  registerRoute,
+  registerRoute
 ])
 
 export const router = createRouter({ routeTree })
