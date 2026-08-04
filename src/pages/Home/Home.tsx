@@ -1,38 +1,43 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import { toast } from 'sonner'
 import Button from '@/components/ui/Button/Button'
 import Modal from '@/components/blocks/Modal/Modal'
 import styles from './Home.module.css'
 import { getUsers } from '@/api/getUsers'
-import { updateUser } from '@/api/updateUser'
+import { deleteUser } from '@/api/deleteUser'
 import type { User } from '@/api/types'
+import logoHorizontal from '@/assets/logo-horizontal.png'
 
-const ROLES = ['ROOT', 'ADMIN', 'USER', 'GUEST']
+// Importamos los íconos desde el archivo centralizado
+import { EyeIcon, EditIcon, TrashIcon, SearchIcon } from '../../components/ui/Icons/Icons'
+
+import UserDetails from './components/UserDetails'
+import UserEditForm from './components/UserEditForm'
 
 function Home() {
   const navigate = useNavigate()
 
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
-  // Usuario seleccionado para ver o editar en el modal
   const [modalUser, setModalUser] = useState<User | null>(null)
   const [modalMode, setModalMode] = useState<'view' | 'edit' | null>(null)
+  
+  const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
-    // Protección mínima de ruta: sin token no tiene sentido estar acá
     if (!localStorage.getItem('token')) {
       navigate({ to: '/login' })
       return
     }
-    // Pedimos los usuarios a la API al montar el componente
+
     async function loadUsers() {
       try {
         const data = await getUsers()
         setUsers(data)
-      } catch (error: any) {
-        setError(error.message)
+      } catch (error) {
+        setUsers([])
       } finally {
         setLoading(false)
       }
@@ -42,9 +47,9 @@ function Home() {
   }, [navigate])
 
   function handleLogout() {
-    // Cerrar sesión = borrar el token y volver al login
     localStorage.removeItem('token')
     localStorage.removeItem('role')
+    toast.info('Sesión cerrada.')
     navigate({ to: '/login' })
   }
 
@@ -63,75 +68,193 @@ function Home() {
     setModalUser(null)
   }
 
-  function handleUserUpdated(updated: User) {
-    setUsers((prev) => prev.map((u) => (u._id === updated._id ? updated : u)))
+  function handleUserUpdated(updated: User | any) {
+    const updatedUser = updated?.data ? updated.data : updated
+
+    setUsers((prev) =>
+      prev.map((u) => {
+        const updatedId = updatedUser._id || updatedUser.id
+        if (u._id === updatedId) {
+          return {
+            ...u,
+            ...updatedUser,
+            _id: u._id,
+          }
+        }
+        return u
+      })
+    )
+    
     closeModal()
+    toast.success('Cambios guardados.')
   }
+
+  async function handleDelete(user: User) {
+    // Solicitamos el motivo para el registro de auditoría
+    const motivo = window.prompt(
+      `Estás por eliminar al usuario ${user.nombre} ${user.apellido}.\n\nPor favor, ingresá el motivo de la eliminación para el registro de auditoría:`
+    )
+
+    // Si el administrador cancela el prompt, abortamos la función
+    if (motivo === null) return
+
+    // Validamos que el administrador no envíe un string vacío o con solo espacios
+    if (motivo.trim() === '') {
+      toast.error('Operación cancelada: Debes ingresar un motivo válido para eliminar al usuario.')
+      return
+    }
+
+    try {
+      // Pasamos el id del usuario y el motivo a nuestra API actualizada
+      await deleteUser(user._id, motivo)
+      
+      setUsers((prev) => prev.filter((u) => u._id !== user._id))
+      toast.success('Usuario eliminado y auditado con éxito.')
+    } catch (err) {
+      // El error lo ataja e informa apiClient automáticamente
+    }
+  }
+
+  const filteredUsers = users.filter((user) => {
+    const searchLower = searchTerm.toLowerCase()
+    return (
+      user.nombre.toLowerCase().includes(searchLower) ||
+      user.apellido.toLowerCase().includes(searchLower) ||
+      user.email.toLowerCase().includes(searchLower) ||
+      user.role.toLowerCase().includes(searchLower)
+    )
+  })
+
+  const userRole = localStorage.getItem('role')
+  const isManager = userRole === 'ROOT' || userRole === 'ADMIN'
 
   return (
     <main className={styles.container}>
-
+      {/* HEADER CON TÍTULO, LOGO CENTRADO Y ACCIONES */}
       <div className={styles.header}>
-        <h1 className={styles.title}>Usuarios</h1>
+        <div className={styles.headerBrand}>
+          <h1 className={styles.title}>LP Gestion</h1>
+          <p className={styles.subtitle}>Gestión usuarios</p>
+        </div>
+
+        <div className={styles.logoContainer}>
+          <img src={logoHorizontal} alt="Logo LP Gestión" className={styles.headerLogo} />
+        </div>
+
         <div className={styles.headerActions}>
-          <Button variant="primary" onClick={() => navigate({ to: '/create-user' })}>+ Agregar</Button>
-          <Button variant="secondary" onClick={handleLogout}>Cerrar sesión</Button>
+          {isManager && (
+            <Button variant="primary" onClick={() => navigate({ to: '/create-user' })}>
+              + Agregar Usuario
+            </Button>
+          )}
+          <Button variant="secondary" onClick={handleLogout}>
+            Cerrar sesión
+          </Button>
         </div>
       </div>
 
-      {/* Estados de la petición: cargando → error → vacío → tabla */}
+      <div className={styles.sectionHeader}>
+        <h2 className={styles.sectionTitle}>Directorio de Usuarios</h2>
+        
+        <div className={styles.searchContainer}>
+          <div className={styles.searchIconWrapper}>
+            <SearchIcon />
+          </div>
+          <input
+            type="text"
+            placeholder="Buscar por nombre, email o rol..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
+      </div>
+
       {loading && <p className={styles.message}>Cargando usuarios...</p>}
-
-      {error && <p className={styles.error}>{error}</p>}
-
-      {!loading && !error && users.length === 0 && (
+      
+      {!loading && users.length === 0 && (
         <p className={styles.message}>No hay usuarios para mostrar</p>
       )}
 
-      {!loading && !error && users.length > 0 && (
+      {!loading && users.length > 0 && filteredUsers.length === 0 && (
+        <p className={styles.message}>No se encontraron usuarios que coincidan con "{searchTerm}"</p>
+      )}
+
+      {!loading && filteredUsers.length > 0 && (
         <div className={styles.tableWrapper}>
           <table className={styles.table}>
             <thead>
               <tr>
                 <th className={styles.th}>Usuario</th>
                 <th className={styles.th}>Email</th>
-                <th className={styles.th}>Género</th>
+                <th className={styles.th}>Teléfono</th>
                 <th className={styles.th}>Localidad</th>
                 <th className={styles.th}>Rol</th>
                 <th className={styles.th}>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <tr key={user._id} className={styles.tr}>
                   <td className={styles.td}>
                     <div className={styles.userCell}>
-                      {/* La API no devuelve imagen: generamos un avatar con el nombre */}
                       <img
                         className={styles.avatar}
                         src={`https://ui-avatars.com/api/?name=${user.nombre}+${user.apellido}&background=random`}
                         alt={`${user.nombre} ${user.apellido}`}
                       />
-                      <span>{user.nombre} {user.apellido}</span>
+                      <span>
+                        {user.nombre} {user.apellido}
+                      </span>
                     </div>
                   </td>
-                  <td className={styles.td}>{user.email}</td>
-                  <td className={styles.td}>{user.genero}</td>
-                  <td className={styles.td}>{user.localidad}</td>
                   <td className={styles.td}>
-                    <span className={`${styles.badge} ${styles[`badge__${user.role.toLowerCase()}`] ?? ''}`}>
+                    <a
+                      href={`https://mail.google.com/mail/?view=cm&fs=1&to=${user.email}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.emailLink}
+                    >
+                      {user.email}
+                    </a>
+                  </td>
+                  <td className={styles.td}>{user.telefono || '-'}</td>
+                  <td className={styles.td}>{user.localidad || '-'}</td>
+                  <td className={styles.td}>
+                    <span
+                      className={`${styles.badge} ${
+                        styles[`badge__${user.role ? user.role.toLowerCase() : 'user'}`] ?? ''
+                      }`}
+                    >
                       {user.role}
                     </span>
                   </td>
                   <td className={styles.td}>
                     <div className={styles.actions}>
-                      <button className={styles.actionBtn} onClick={() => openView(user)}>Ver</button>
+                      <button
+                        className={`${styles.actionBtn} ${styles.actionBtnView}`}
+                        onClick={() => openView(user)}
+                        title="Inspeccionar usuario"
+                      >
+                        <EyeIcon />
+                      </button>
                       <button
                         className={`${styles.actionBtn} ${styles.actionBtnEdit}`}
                         onClick={() => openEdit(user)}
+                        title="Editar usuario"
                       >
-                        Editar
+                        <EditIcon />
                       </button>
+                      {isManager && (
+                        <button
+                          className={`${styles.actionBtn} ${styles.actionBtnDelete}`}
+                          onClick={() => handleDelete(user)}
+                          title="Eliminar usuario"
+                          aria-label="Eliminar usuario"
+                        >
+                          <TrashIcon />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -151,257 +274,7 @@ function Home() {
           <UserEditForm user={modalUser} onCancel={closeModal} onSaved={handleUserUpdated} />
         )}
       </Modal>
-
     </main>
-  )
-}
-
-// ------------------------------------------------------------
-// Vista "Ver": detalle de usuario en modo solo lectura
-// ------------------------------------------------------------
-function UserDetails({ user }: { user: User }) {
-  const fields: [string, string][] = [
-    ['Nombre', `${user.nombre} ${user.apellido}`],
-    ['Email', user.email],
-    ['Rol', user.role],
-    ['Género', user.genero],
-    ['Edad', String(user.edad)],
-    ['Fecha de nacimiento', user.fechaNacimiento?.slice(0, 10)],
-    ['Teléfono', user.telefono],
-    ['Dirección', user.direccion],
-    ['Localidad', user.localidad],
-    ['Provincia', user.provincia],
-    ['País', user.pais],
-    ['Código postal', user.codigoPostal],
-  ]
-
-  return (
-    <dl className={styles.viewGrid}>
-      {fields.map(([label, value]) => (
-        <div className={styles.viewRow} key={label}>
-          <dt className={styles.viewLabel}>{label}</dt>
-          <dd className={styles.viewValue}>{value || '-'}</dd>
-        </div>
-      ))}
-    </dl>
-  )
-}
-
-// ------------------------------------------------------------
-// Vista "Editar": formulario que guarda cambios con updateUser
-// El email no se incluye: el backend no permite modificarlo
-// ------------------------------------------------------------
-function UserEditForm({
-  user,
-  onCancel,
-  onSaved,
-}: {
-  user: User
-  onCancel: () => void
-  onSaved: (user: User) => void
-}) {
-  const [nombre, setNombre] = useState(user.nombre)
-  const [apellido, setApellido] = useState(user.apellido)
-  const [genero, setGenero] = useState(user.genero)
-  const [edad, setEdad] = useState(String(user.edad))
-  const [fechaNacimiento, setFechaNacimiento] = useState(user.fechaNacimiento?.slice(0, 10) ?? '')
-  const [telefono, setTelefono] = useState(user.telefono)
-  const [direccion, setDireccion] = useState(user.direccion)
-  const [localidad, setLocalidad] = useState(user.localidad)
-  const [provincia, setProvincia] = useState(user.provincia)
-  const [pais, setPais] = useState(user.pais)
-  const [codigoPostal, setCodigoPostal] = useState(user.codigoPostal)
-  const [role, setRole] = useState(user.role)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
-    try {
-      const updated = await updateUser(user._id, {
-        nombre,
-        apellido,
-        genero,
-        edad: Number(edad),
-        fechaNacimiento,
-        telefono,
-        direccion,
-        localidad,
-        provincia,
-        pais,
-        codigoPostal,
-        role,
-      })
-      onSaved(updated)
-    } catch (error: any) {
-      setError(error.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <form className={styles.editForm} onSubmit={handleSubmit}>
-      <div className={styles.formRow}>
-        <div>
-          <label className={styles.label} htmlFor="edit-nombre">Nombre</label>
-          <input
-            className={styles.input}
-            id="edit-nombre"
-            type="text"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label className={styles.label} htmlFor="edit-apellido">Apellido</label>
-          <input
-            className={styles.input}
-            id="edit-apellido"
-            type="text"
-            value={apellido}
-            onChange={(e) => setApellido(e.target.value)}
-            required
-          />
-        </div>
-      </div>
-
-      <div className={styles.formRow}>
-        <div>
-          <label className={styles.label} htmlFor="edit-genero">Género</label>
-          <input
-            className={styles.input}
-            id="edit-genero"
-            type="text"
-            value={genero}
-            onChange={(e) => setGenero(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label className={styles.label} htmlFor="edit-edad">Edad</label>
-          <input
-            className={styles.input}
-            id="edit-edad"
-            type="number"
-            min={1}
-            max={120}
-            value={edad}
-            onChange={(e) => setEdad(e.target.value)}
-            required
-          />
-        </div>
-      </div>
-
-      <div className={styles.formRow}>
-        <div>
-          <label className={styles.label} htmlFor="edit-fechaNacimiento">Fecha de nacimiento</label>
-          <input
-            className={styles.input}
-            id="edit-fechaNacimiento"
-            type="date"
-            value={fechaNacimiento}
-            onChange={(e) => setFechaNacimiento(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label className={styles.label} htmlFor="edit-telefono">Teléfono</label>
-          <input
-            className={styles.input}
-            id="edit-telefono"
-            type="text"
-            value={telefono}
-            onChange={(e) => setTelefono(e.target.value)}
-            required
-          />
-        </div>
-      </div>
-
-      <label className={styles.label} htmlFor="edit-direccion">Dirección</label>
-      <input
-        className={styles.input}
-        id="edit-direccion"
-        type="text"
-        value={direccion}
-        onChange={(e) => setDireccion(e.target.value)}
-        required
-      />
-
-      <div className={styles.formRow}>
-        <div>
-          <label className={styles.label} htmlFor="edit-localidad">Localidad</label>
-          <input
-            className={styles.input}
-            id="edit-localidad"
-            type="text"
-            value={localidad}
-            onChange={(e) => setLocalidad(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label className={styles.label} htmlFor="edit-provincia">Provincia</label>
-          <input
-            className={styles.input}
-            id="edit-provincia"
-            type="text"
-            value={provincia}
-            onChange={(e) => setProvincia(e.target.value)}
-            required
-          />
-        </div>
-      </div>
-
-      <div className={styles.formRow}>
-        <div>
-          <label className={styles.label} htmlFor="edit-pais">País</label>
-          <input
-            className={styles.input}
-            id="edit-pais"
-            type="text"
-            value={pais}
-            onChange={(e) => setPais(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label className={styles.label} htmlFor="edit-codigoPostal">Código postal</label>
-          <input
-            className={styles.input}
-            id="edit-codigoPostal"
-            type="text"
-            value={codigoPostal}
-            onChange={(e) => setCodigoPostal(e.target.value)}
-            required
-          />
-        </div>
-      </div>
-
-      <label className={styles.label} htmlFor="edit-role">Rol</label>
-      <select
-        className={styles.select}
-        id="edit-role"
-        value={role}
-        onChange={(e) => setRole(e.target.value)}
-      >
-        {ROLES.map((r) => (
-          <option key={r} value={r}>{r}</option>
-        ))}
-      </select>
-
-      {error && <p className={styles.error}>{error}</p>}
-
-      <div className={styles.modalActions}>
-        <Button variant="secondary" type="button" onClick={onCancel}>Cancelar</Button>
-        <Button variant="primary" type="submit" disabled={loading}>
-          {loading ? 'Guardando...' : 'Guardar cambios'}
-        </Button>
-      </div>
-    </form>
   )
 }
 

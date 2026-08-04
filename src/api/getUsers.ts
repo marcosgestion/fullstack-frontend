@@ -1,26 +1,19 @@
-import { API_URL } from '@/config/globals'
+import { apiClient } from './client'
 import type { User } from '@/api/types'
 
 // ------------------------------------------------------------
 // GET /users → devuelve la lista de usuarios
-// Es una ruta protegida: hay que mandar el token del login
+// Es una ruta protegida: delegamos la autenticación y el
+// manejo de errores global a apiClient.
 // ------------------------------------------------------------
 export async function getUsers(): Promise<User[]> {
-  // El token guardado en el login prueba quienes somos
-  const token = localStorage.getItem('token')
+  const data = await apiClient<User | User[]>('/users')
 
-  const response = await fetch(`${API_URL}/users`, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  })
-
-  const body = await response.json()
-
-  if (!body.success) {
-    throw new Error(body.message) // ej: "Acceso denegado", "Token inválido"
+  // Normalización estricta: Garantizamos devolver un Array
+  // independientemente de si el backend responde con objeto o array.
+  if (data) {
+    return Array.isArray(data) ? data : [data]
   }
 
-  return body.data
+  return []
 }

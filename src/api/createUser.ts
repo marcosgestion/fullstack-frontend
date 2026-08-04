@@ -1,26 +1,24 @@
-import { API_URL } from '@/config/globals'
+import { apiClient } from './client'
 
 // ------------------------------------------------------------
-// POST /users → crea un usuario nuevo
-// Es una ruta protegida: solo un admin ya logueado puede crear usuarios
+// POST /users → crea un usuario desde la vista de administración
+// Delegamos el envío de credenciales, payload y manejo de errores a apiClient.
 // ------------------------------------------------------------
-export async function createUser(nombre: string, apellido: string, email: string, password: string) {
-  const token = localStorage.getItem('token')
-
-  const response = await fetch(`${API_URL}/users`, {
+export async function createUser(
+  nombre: string,
+  apellido: string,
+  email: string,
+  password: string,
+  role: string = 'USER'
+) {
+  return await apiClient('/users', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify({
       nombre,
       apellido,
       email,
       password,
-      role: 'USER',
-      // El backend exige estos campos también.
-      // Para mantener el formulario simple, mandamos valores por defecto.
+      role,
       fechaNacimiento: '2000-01-01',
       edad: 25,
       genero: 'No especificado',
@@ -32,12 +30,4 @@ export async function createUser(nombre: string, apellido: string, email: string
       codigoPostal: '0000',
     }),
   })
-
-  const body = await response.json()
-
-  if (!body.success) {
-    throw new Error(body.message) // ej: "El usuario ya existe", "Acceso denegado"
-  }
-
-  return body.data
 }

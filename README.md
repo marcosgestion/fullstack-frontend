@@ -1,118 +1,109 @@
-# React App — Arquitectura Base
+# LP Gestión - Web Application (Frontend)
 
-Proyecto base para el curso Full Stack MERN. Está pensado para que los estudiantes hagan `git clone`, instalen dependencias y comiencen a trabajar sobre una arquitectura moderna y ordenada.
-
----
-
-## Tecnologías
-
-| Tecnología | Uso |
-|---|---|
-| [React 19](https://react.dev/) | Librería de UI |
-| [Vite](https://vitejs.dev/) | Bundler y servidor de desarrollo |
-| [TanStack Router](https://tanstack.com/router) | Routing con tipado completo |
-| [CSS Modules](https://github.com/css-modules/css-modules) | Estilos con alcance local por componente |
-| TypeScript | Tipado estático |
+Aplicación web cliente para la plataforma **LP Gestión**, desarrollada con React 19, TypeScript y Vite. Diseñada bajo una arquitectura modular por componentes y páginas, la interfaz se conecta de manera stateless a la API REST server para gestionar la visualización, filtrado, edición y auditoría de usuarios según su jerarquía de roles (RBAC).
 
 ---
 
-## Cómo correr el proyecto
+## 🏗️ Arquitectura del Proyecto
 
-```bash
-# 1. Clonar el repositorio
-git clone <URL_DEL_REPOSITORIO>
-cd reactjs
+El proyecto sigue una convención estricta de carpetas por módulo y componente. Cada vista o componente cuenta con su propio archivo de estructura (`.tsx`) y su módulo de estilos locales (`.module.css`), evitando colisiones de estilos globales.
 
-# 2. Instalar dependencias
-npm install
-
-# 3. Iniciar el servidor de desarrollo
-npm run dev
+```text
+src/
+├── api/            # Capa de integración HTTP personalizada (apiClient, endpoints y tipos)
+├── assets/         # Archivos multimedia (Imágenes de la marca, logos, videos)
+├── components/     # Componentes reutilizables
+│   ├── blocks/     # Composiciones complejas (Modal de confirmación, Navegación)
+│   └── ui/         # Elementos atómicos de UI (Button, Icons centralizados)
+├── config/         # Constantes globales (API_URL)
+├── pages/          # Vistas principales de la aplicación
+│   ├── CreateUser/ # Vista de creación de usuarios
+│   ├── Home/       # Dashboard principal (Directorio, búsqueda, modales de vista/edición)
+│   ├── Login/      # Pantalla de autenticación con fondo de video
+│   └── Register/   # Pantalla de auto-registro (Asignación automática de rol GUEST)
+├── styles/         # Estilos globales y variables de diseño (Tema Oscuro/Claro)
+├── App.tsx         # Componente raíz con RouterProvider e inyección de Notificaciones Toast
+├── main.tsx        # Punto de entrada de la aplicación en el DOM
+└── router.tsx      # Definición de rutas fuertemente tipadas con TanStack Router
 ```
-
-La aplicación estará disponible en `http://localhost:5173`.
-
-### Scripts disponibles
-
-| Comando | Descripción |
-|---|---|
-| `npm run dev` | Inicia el servidor de desarrollo |
-| `npm run build` | Genera la versión de producción en `/dist` |
-| `npm run preview` | Previsualiza el build de producción localmente |
 
 ---
 
-## Arquitectura de carpetas
+## 🛠️ Stack Tecnológico Principal
 
-```
-reactjs/
-├── index.html              # Punto de entrada HTML (Vite lo usa como base)
-├── vite.config.ts          # Configuración de Vite
-├── tsconfig.json           # Configuración de TypeScript para el código fuente
-├── tsconfig.node.json      # Configuración de TypeScript para herramientas (Vite)
-└── src/
-    ├── main.tsx            # Punto de entrada: monta <App /> en el DOM
-    ├── App.tsx             # Componente raíz: contiene el RouterProvider
-    ├── router.tsx          # Definición de todas las rutas de la aplicación
-    │
-    ├── api/                # Funciones para llamar a la API (fetch)
-    ├── assets/             # Archivos estáticos (imágenes, íconos, fuentes)
-    ├── config/             # Configuración global (variables de entorno, constantes)
-    ├── store/              # Estado global (Zustand, Jotai o Context API)
-    ├── types/              # Tipos TypeScript globales y compartidos
-    │
-    ├── styles/
-    │   ├── variables.css   # Variables CSS globales (colores, espaciado, tipografía)
-    │   └── global.css      # Reset CSS y estilos base del proyecto
-    │
-    ├── components/
-    │   ├── ui/             # Componentes de UI reutilizables (Button, Input, Modal...)
-    │   │   └── Button/
-    │   │       ├── Button.tsx
-    │   │       └── Button.module.css
-    │   └── blocks/         # Composiciones de componentes (Navbar, Footer, Card...)
-    │
-    └── pages/              # Una carpeta por página, con su propio CSS Module
-        ├── Home/
-        │   ├── Home.tsx
-        │   └── Home.module.css
-        ├── Login/
-        │   ├── Login.tsx
-        │   └── Login.module.css
-        └── Register/
-            ├── Register.tsx
-            └── Register.module.css
-```
+| Tecnología | Propósito en el Proyecto |
+| :--- | :--- |
+| **React 19** | Librería principal para la construcción de interfaces de usuario reactivas. |
+| **Vite** | Bundler y servidor de desarrollo ultra-rápido basado en ESM. |
+| **TypeScript** | Tipado estático estricto para garantizar la integridad de datos de la API. |
+| **TanStack Router** | Enrutador declarativo con tipado completo y navegación sin recargas. |
+| **CSS Modules** | Estilos con alcance local por componente (*scoped CSS*) para evitar colisiones. |
+| **Sonner** | Sistema centralizado de notificaciones interactivas (*Toasts*) ricas en color. |
 
-### Convención de carpetas
+---
 
-Cada página y componente vive en su propia carpeta con el mismo nombre. Dentro de esa carpeta van el archivo `.tsx` y su archivo de estilos `.module.css`. Esto mantiene el código y los estilos siempre juntos y fáciles de encontrar.
+## 🛡️ Características Avanzadas del Frontend
 
-**Ejemplo:**
-```
-components/ui/Button/
-├── Button.tsx          ← lógica y estructura del componente
-└── Button.module.css   ← estilos con alcance local (solo afectan a este componente)
+### 1. Cliente HTTP Centralizado (`apiClient`)
+Toda comunicación con la API REST se canaliza a través del helper `apiClient` (`src/api/client.ts`):
+* **Inyección de Token:** Inyecta automáticamente el encabezado `Authorization: Bearer <token>` recuperado de `localStorage`.
+* **Gestión Unificada de Errores:** Captura errores HTTP y muestra alertas visuales con `sonner`.
+* **Manejo de Expiración (401):** Si el token expira o es inválido, muestra un toast de advertencia y redirige automáticamente al usuario a `/login` tras un retardo de 1.5 segundos para garantizar la lectura de la alerta.
+
+### 2. Flujo de Auditoría en Eliminación de Usuarios
+Al eliminar un registro desde la tabla principal (`Home.tsx`), la aplicación solicita obligatoriamente el **motivo de la eliminación** mediante un recuadro de texto. Este motivo se envía en el body de la petición `DELETE /users/:id`, permitiendo al Backend registrar el evento completo en la colección de auditoría `SecurityLog`.
+
+### 3. Adaptación Dinámica por Roles (RBAC UI)
+La interfaz adapta sus elementos visibles según el rol del usuario autenticado:
+* **Insignias Visuales (Badges):** Identificación por colores para los roles `ROOT`, `ADMIN`, `USER` y `GUEST`.
+* **Control de Acciones:** Los botones de creación (`+ Agregar Usuario`) y eliminación de registros se habilitan exclusivamente para jerarquías operativas `ROOT` y `ADMIN`.
+* **Filtro y Búsqueda en Tiempo Real:** Filtro cliente por nombre, apellido, email o rol sin necesidad de peticiones adicionales al servidor.
+
+---
+
+## ⚙️ Configuración del Entorno
+
+La URL del backend se configura globalmente en `src/config/globals.ts`:
+
+```typescript
+// URL del servidor API REST (Express)
+export const API_URL = 'http://localhost:3080'
 ```
 
-### CSS Modules
+---
 
-Los CSS Modules garantizan que los estilos de un componente **no afecten** a otros. Vite los procesa automáticamente al importar el archivo `.module.css`.
+## 🚀 Instalación y Ejecución
 
-```tsx
-import styles from './Button.module.css'
+1. **Clonar y preparar el repositorio:**
+   ```bash
+   git clone [https://github.com/marcosgestion/fullstack-frontend.git](https://github.com/marcosgestion/fullstack-frontend.git)
+   cd fullstack-frontend
+   npm install
+   ```
 
-function Button() {
-  return <button className={styles.button}>Click</button>
-}
-```
+2. **Iniciar Servidor de Desarrollo:**
+   ```bash
+   npm run dev
+   ```
+   La aplicación estará disponible en `http://localhost:5173`.
 
-### Rutas disponibles
+3. **Generar Build de Producción:**
+   ```bash
+   npm run build
+   ```
 
-| Ruta | Página |
-|---|---|
-| `/` | Home |
-| `/login` | Login |
-| `/register` | Register |
+4. **Previsualizar Build de Producción:**
+   ```bash
+   npm run preview
+   ```
 
-Las rutas están definidas en `src/router.tsx` usando **TanStack Router** con routing basado en código (sin generación automática de archivos).
+---
+
+## 📍 Mapa de Navegación y Rutas
+
+| Ruta | Vista | Acceso / Permisos | Descripción |
+| :--- | :--- | :--- | :--- |
+| `/` | `Home` | Requiere Token | Directorio principal de usuarios con modal de detalle y edición. |
+| `/login` | `Login` | Público | Autenticación con credenciales y almacenamiento de JWT en `localStorage`. |
+| `/register` | `Register` | Público | Formulario de registro para nuevos usuarios con asignación por defecto rol GUEST. |
+| `/create-user` | `CreateUser` | Requiere Token (ROOT/ADMIN) | Formulario para el alta de nuevos usuarios desde el panel de control. |

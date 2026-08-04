@@ -1,28 +1,56 @@
 .button {
-  padding: 0.5rem 1rem;
+  padding: 12px 24px;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.button:hover:not(:disabled) {
-  opacity: 0.85;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s;
 }
 
 .button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
+/* ============================================================
+   VARIANTE PRIMARIA: GRADIENTE + SOMBRA MÁGICA
+============================================================ */
 .primary {
-  background-color: var(--color-primary);
   color: white;
+  background: linear-gradient(135deg, #a3d920 0%, #3a7e3a 100%);
+  box-shadow:
+    0 4px 15px rgba(0, 255, 0, 0.3),
+    0 0 10px rgba(78, 127, 237, 0.4),
+    0 0 5px rgba(237, 78, 237, 0.2);
 }
 
+.primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 20px rgba(0, 255, 0, 0.4),
+    0 0 15px rgba(78, 127, 237, 0.5),
+    0 0 8px rgba(237, 78, 237, 0.3);
+}
+
+.primary:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow:
+    0 2px 10px rgba(0, 255, 0, 0.2),
+    0 0 5px rgba(78, 127, 237, 0.3);
+}
+
+/* ============================================================
+   VARIANTE SECUNDARIA
+============================================================ */
 .secondary {
   background-color: transparent;
   color: var(--color-primary);
   border: 1px solid var(--color-primary);
+}
+
+.secondary:hover:not(:disabled) {
+  background-color: rgba(100, 108, 255, 0.1);
 }

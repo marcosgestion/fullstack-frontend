@@ -1,265 +1,338 @@
+/* ============================================================
+                CONTENEDOR Y CABECERA GLOBAL
+============================================================ */
 .container {
   min-height: 100vh;
-    background-color: #0a0a0a;
-    padding: 40px;
-  }
+  background-color: var(--bg-primary);
+  padding: 40px;
+  transition: background-color 0.3s ease;
+}
+  
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.headerBrand {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.logoContainer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.headerLogo {
+  max-height: 46px;
+  width: auto;
+  object-fit: contain;
+  /* Convierte las letras oscuras de la imagen a blanco puro con un resplandor en el verde de la marca */
+  filter: brightness(0) invert(1) drop-shadow(0 0 10px rgba(163, 217, 32, 0.35));
+  opacity: 0.9;
+  transition: all 0.2s ease;
+}
+
+.headerLogo:hover {
+  opacity: 1;
+  filter: brightness(0) invert(1) drop-shadow(0 0 16px rgba(163, 217, 32, 0.6));
+}
+
+.headerActions {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+}
+  
+.title {
+  font-size: 30px;
+  font-weight: 700;
+  color: #a3d920;
+  margin: 0 0 4px 0;
+  font-style: italic; 
+  letter-spacing: 1.5px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ============================================================
+                BUSCADOR Y TÍTULO DE SECCIÓN
+============================================================ */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 40px 0 24px 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.searchContainer {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+}
+
+.searchIconWrapper {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  display: flex;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 16px 10px 38px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  border-color: #a3d920;
+  background-color: var(--bg-primary);
+}
+
+.searchInput::placeholder {
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+                TABLA Y CONTENIDO DE CELDAS
+============================================================ */
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+  
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-secondary);
+}
+  
+.th {
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+}
+  
+.tr:not(:last-child) {
+  border-bottom: 1px solid var(--border-color);
+}
+  
+.tr:hover {
+  background-color: var(--bg-primary);
+}
+  
+.td {
+  padding: 14px 16px;
+  font-size: 14px;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+  
+.userCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+  
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.emailLink {
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.emailLink:hover {
+  color: #a3d920;
+  text-decoration: underline;
+}
+  
+/* ============================================================
+                BADGES (JERARQUÍA DE ROLES)
+============================================================ */
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.badge__root {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(218, 165, 32, 0.05));
+  color: #ffd700;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
+}
+
+.badge__admin {
+  background: linear-gradient(135deg, rgba(224, 224, 224, 0.15), rgba(169, 169, 169, 0.05));
+  color: #e0e0e0;
+  border: 1px solid rgba(224, 224, 224, 0.3);
+  box-shadow: 0 0 10px rgba(224, 224, 224, 0.1);
+}
+
+.badge__user {
+  background: linear-gradient(135deg, rgba(205, 127, 50, 0.15), rgba(139, 69, 19, 0.05));
+  color: #cd7f32;
+  border: 1px solid rgba(205, 127, 50, 0.3);
+}
+
+.badge__guest {
+  background-color: rgba(255, 255, 255, 0.03);
+  color: #d00ca2;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+  
+/* ============================================================
+                BOTONES DE ACCIÓN (TABLA)
+============================================================ */
+.actions { display: flex; gap: 8px; }
+  
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: transparent;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.actionBtnView { border-color: var(--border-color); color: var(--text-secondary); }
+.actionBtnView:hover { border-color: var(--text-primary); color: var(--text-primary); background-color: var(--bg-primary); }
+
+.actionBtnEdit { border-color: rgba(163, 217, 32, 0.3); color: #a3d920; }
+.actionBtnEdit:hover { border-color: #a3d920; color: #fff; background-color: rgba(163, 217, 32, 0.1); }
+
+.actionBtnDelete { border-color: rgba(255, 94, 0, 0.4); color: #ff5e00; }
+.actionBtnDelete:hover { border-color: #ff5e00; color: #ff7a29; background-color: rgba(255, 94, 0, 0.12); }
+  
+/* ============================================================
+                ESTILOS COMPARTIDOS (MODALES)
+============================================================ */
+.viewContainer { display: flex; flex-direction: column; gap: 24px; }
+.viewGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 24px; margin: 0; }
+.viewRow { display: flex; flex-direction: column; gap: 4px; }
+
+.viewLabel {
+  font-size: 12px; font-weight: 600; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+.viewValue { font-size: 15px; color: var(--text-primary); margin: 0; }
+
+.addressBlock {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mapsLink {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: #a3d920; font-size: 15px; font-weight: 500; text-decoration: none;
+  transition: all 0.2s ease;
+}
+.mapsLink:hover { color: var(--text-primary); opacity: 0.9; }
+
+.editForm { display: flex; flex-direction: column; }
+.formRow { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 16px; }
+
+.input, .select {
+  width: 100%; padding: 12px 16px; margin-bottom: 16px;
+  background-color: var(--bg-secondary); border: 1px solid var(--border-color);
+  border-radius: 8px; color: var(--text-primary); font-size: 14px;
+  box-sizing: border-box; outline: none; transition: all 0.2s ease;
+}
+.input:focus, .select:focus { border-color: #a3d920; }
+
+.modalActions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
+
+/* ============================================================
+                MOBILE
+============================================================ */
+@media (max-width: 768px) {
+  .container { padding: 20px 16px; }
   
   .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
+    flex-direction: column;
+    gap: 1.25rem;
+    text-align: center;
   }
-  
-  .header>button {
-    width: auto;
-    padding: 10px 20px;
-    margin-top: 0;
-  }
-  
+
+  .headerBrand,
+  .logoContainer,
   .headerActions {
-    display: flex;
-    gap: 12px;
-  }
-
-  .headerActions button {
-    width: auto;
-    padding: 10px 20px;
-    margin-top: 0;
-  }
-
-  .title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #ffffff;
-    margin: 0;
-  }
-
-  /* Mensajes de estado de la petición a la API */
-  .message {
-    color: #888;
-    font-size: 15px;
-  }
-
-  .error {
-    color: #ff6b6b;
-    font-size: 15px;
-  }
-  
-  /* ============================================================
-                                  TABLE
-  ============================================================ */
-  .tableWrapper {
-    overflow-x: auto;
-    border-radius: 12px;
-    border: 1px solid #222;
-  }
-  
-  .table {
+    flex: none;
     width: 100%;
-    border-collapse: collapse;
-    background-color: #111;
-  }
-  
-  .th {
-    padding: 14px 16px;
-    text-align: left;
-    font-size: 12px;
-    font-weight: 600;
-    color: #888;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid #222;
-    background-color: #0f0f0f;
-  }
-  
-  .tr:not(:last-child) {
-    border-bottom: 1px solid #1a1a1a;
-  }
-  
-  .tr:hover {
-    background-color: #161616;
-  }
-  
-  .td {
-    padding: 14px 16px;
-    font-size: 14px;
-    color: #ccc;
-    white-space: nowrap;
-  }
-  
-  /* ============================================================
-                                  USER CELL
-    ============================================================ */
-  .userCell {
-    display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 12px;
-  }
-  
-  .avatar {
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    background-color: #1a1a1a;
-    border: 1px solid #333;
-    flex-shrink: 0;
-  }
-  
-  /* ============================================================
-                                  BADGE
-      ============================================================ */
-  .badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-  
-  .badge__admin {
-    background-color: rgba(155, 93, 229, 0.15);
-    color: #b07ef8;
-  }
-  
-  .badge__editor {
-    background-color: rgba(0, 200, 150, 0.12);
-    color: #00c896;
-  }
-  
-  .badge__user {
-    background-color: rgba(255, 255, 255, 0.06);
-    color: #888;
-  }
-  
-  /* ============================================================
-                                  ACTION BUTTONS
-        ============================================================ */
-  .actions {
-    display: flex;
-    gap: 8px;
-  }
-  
-  .actionBtn {
-    padding: 6px 14px;
-    font-size: 13px;
-    font-weight: 500;
-    border-radius: 6px;
-    cursor: pointer;
-    border: 1px solid #333;
-    background-color: transparent;
-    color: #ccc;
-    transition: border-color 0.15s, color 0.15s;
-  }
-  
-  .actionBtn:hover {
-    border-color: #666;
-    color: #fff;
-  }
-  
-  .actionBtnEdit {
-    border-color: rgba(155, 93, 229, 0.4);
-    color: #b07ef8;
-  }
-  
-  .actionBtnEdit:hover {
-    border-color: #9b5de5;
-    color: #c49dfa;
-  }
-  
-  /* ============================================================
-                                  MODAL — VER (detalle de usuario)
-  ============================================================ */
-  .viewGrid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px 24px;
-    margin: 0;
   }
 
-  .viewRow {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .viewLabel {
-    font-size: 12px;
-    font-weight: 600;
-    color: #888;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .viewValue {
-    font-size: 14px;
-    color: #eee;
-    margin: 0;
-  }
-
-  /* ============================================================
-                                  MODAL — EDITAR (formulario)
-  ============================================================ */
-  .editForm {
-    display: flex;
-    flex-direction: column;
-  }
-
+  .headerBrand { align-items: center; }
+  .headerLogo { max-height: 44px; }
+  .headerActions { flex-wrap: wrap; }
+  
+  .viewGrid,
   .formRow {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0 16px;
+    grid-template-columns: 1fr;
   }
-
-  .label {
-    font-size: 13px;
-    font-weight: 500;
-    color: #ccc;
-    margin-bottom: 6px;
-  }
-
-  .input,
-  .select {
-    width: 100%;
-    padding: 12px 16px;
-    margin-bottom: 16px;
-    background-color: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 8px;
-    color: #fff;
-    font-size: 14px;
-    box-sizing: border-box;
-    outline: none;
-  }
-
-  .input:focus,
-  .select:focus {
-    border-color: #666;
-  }
-
-  .modalActions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 8px;
-  }
-
-  .modalActions button {
-    width: auto;
-    padding: 10px 20px;
-    margin-top: 0;
-  }
-
-  /* ============================================================
-                                  MOBILE
-  ============================================================ */
-  @media (max-width: 768px) {
-    .container {
-      padding: 20px 16px;
-    }
-
-    .viewGrid,
-    .formRow {
-      grid-template-columns: 1fr;
-    }
 }

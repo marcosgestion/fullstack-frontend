@@ -1,24 +1,12 @@
-import { API_URL } from '@/config/globals'
+import { apiClient } from './client'
 
 // ------------------------------------------------------------
-// POST /auth/login → devuelve { token, role }
+// POST /auth/login → realiza la autenticación de usuario
+// Delegamos el envío de datos, parsing JSON y notificación de errores a apiClient.
 // ------------------------------------------------------------
 export async function login(email: string, password: string) {
-  // 1. Hacemos la petición POST con email y password en el body
-  const response = await fetch(`${API_URL}/auth/login`, {
+  return await apiClient('/auth/login', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   })
-
-  // 2. Convertimos la respuesta a JSON
-  const body = await response.json()
-
-  // 3. Si el backend respondió con error, lanzamos su mensaje
-  if (!body.success) {
-    throw new Error(body.message) // ej: "Password incorrecto"
-  }
-
-  // 4. Devolvemos solo la data: { token, role }
-  return body.data
 }

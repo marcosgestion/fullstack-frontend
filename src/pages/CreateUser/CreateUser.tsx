@@ -1,37 +1,37 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
+import { toast } from 'sonner'
 import styles from './CreateUser.module.css'
 import Button from '@/components/ui/Button/Button'
 import { createUser } from '@/api/createUser'
+import logoHorizontal from '@/assets/logo-horizontal.png'
+import depositoImg from '@/assets/deposito.jpg'
 
 function CreateUser() {
   const navigate = useNavigate()
 
-  // Inputs controlados: React es la fuente de verdad del valor
   const [nombre, setNombre] = useState('')
   const [apellido, setApellido] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    // Esta página es solo para admins logueados: sin token, no entra
     if (!localStorage.getItem('token')) {
       navigate({ to: '/login' })
     }
   }, [navigate])
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault() // Evita que el navegador recargue la página
-    setError(null)
+    e.preventDefault()
     setLoading(true)
+
     try {
       await createUser(nombre, apellido, email, password)
-      // Usuario creado → volvemos a la lista para verlo
+      toast.success('Usuario creado correctamente.')
       navigate({ to: '/' })
-    } catch (error: any) {
-      setError(error.message)
+    } catch (err) {
+      // El mensaje de error lo dispara automáticamente apiClient con toast.error
     } finally {
       setLoading(false)
     }
@@ -39,13 +39,12 @@ function CreateUser() {
 
   return (
     <main className={styles.container}>
-
+      {/* LADO IZQUIERDO - FORMULARIO */}
       <section className={styles.left}>
         <form className={styles.form} onSubmit={handleSubmit}>
           <h1 className={styles.title}>Crear Usuario</h1>
           <p className={styles.subtitle}>Completá los datos del nuevo usuario</p>
 
-          <label className={styles.label} htmlFor="name">Nombre</label>
           <input
             className={styles.input}
             id="name"
@@ -54,9 +53,9 @@ function CreateUser() {
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             required
+            disabled={loading}
           />
 
-          <label className={styles.label} htmlFor="lastname">Apellido</label>
           <input
             className={styles.input}
             id="lastname"
@@ -65,33 +64,31 @@ function CreateUser() {
             value={apellido}
             onChange={(e) => setApellido(e.target.value)}
             required
+            disabled={loading}
           />
 
-          <label className={styles.label} htmlFor="email">Email</label>
           <input
             className={styles.input}
             id="email"
             type="email"
-            placeholder="usuario@email.com"
+            placeholder="Email (usuario@email.com)"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            disabled={loading}
           />
 
-          <label className={styles.label} htmlFor="password">Contraseña</label>
           <input
             className={styles.input}
             id="password"
             type="password"
-            placeholder="••••••••"
+            placeholder="Contraseña (Mínimo 6 caracteres)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={6}
+            disabled={loading}
           />
-
-          {/* Mensaje de error que viene del backend */}
-          {error && <p className={styles.error}>{error}</p>}
 
           <Button variant="primary" type="submit" disabled={loading}>
             {loading ? 'Creando...' : 'Crear Usuario'}
@@ -103,8 +100,21 @@ function CreateUser() {
         </form>
       </section>
 
-      <section className={styles.right}></section>
+      {/* LADO DERECHO - IMAGEN DE DEPÓSITO Y LOGO */}
+      <section className={styles.right}>
+        <div className={styles.imageWrapper}>
+          <img src={depositoImg} alt="Depósito de mercadería" className={styles.image} />
+        </div>
 
+        <div className={styles.overlay}>
+          <div className={styles.logoContainer}>
+            <div className={styles.logoContainer}>
+              <img src={logoHorizontal} alt="Logo de la empresa" className={styles.logoImage} />
+            </div>
+            <p className={styles.tagline}></p>
+          </div>
+        </div>
+      </section>
     </main>
   )
 }
