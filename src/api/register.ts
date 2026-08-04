@@ -19,7 +19,7 @@ export async function register(payload: RegisterPayload) {
       role: 'GUEST',
       fechaNacimiento: '2000-01-01',
       edad: 25,
-      genero: 'No especificado',
+      genero: 'No definido',
       telefono: '000000',
       direccion: 'Sin dirección',
       localidad: 'Sin localidad',

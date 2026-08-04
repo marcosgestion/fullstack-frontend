@@ -5,6 +5,7 @@ import type { User } from '@/api/types'
 import styles from '../Home.module.css'
 
 const ROLES = ['ROOT', 'ADMIN', 'USER', 'GUEST']
+const GENEROS = ['Mujer', 'Hombre', 'No definido']
 
 interface UserEditFormProps {
   user: User
@@ -81,15 +82,19 @@ function UserEditForm({ user, onCancel, onSaved }: UserEditFormProps) {
       </div>
 
       <div className={styles.formRow}>
-        <input
-          className={styles.input}
-          type="text"
-          placeholder="Género"
+        <select
+          className={styles.select}
+          title="Género"
           value={genero}
           onChange={(e) => setGenero(e.target.value)}
-          required
           disabled={loading}
-        />
+        >
+          {GENEROS.map((g) => (
+            <option key={g} value={g}>
+              {g}
+            </option>
+          ))}
+        </select>
         <input
           className={styles.input}
           type="number"

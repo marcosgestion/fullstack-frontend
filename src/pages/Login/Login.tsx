@@ -3,6 +3,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import styles from './Login.module.css'
 import Button from '@/components/ui/Button/Button'
+import Brand from '@/components/ui/Brand/Brand'
 import { login } from '@/api/login'
 import logoHorizontal from '@/assets/logo-horizontal.png'
 import bgVideo from '@/assets/work.mp4'
@@ -40,6 +41,7 @@ function Login() {
       {/* LADO IZQUIERDO - FORMULARIO LIMPIO */}
       <section className={styles.left}>
         <form className={styles.form} onSubmit={handleSubmit}>
+          <Brand />
           <h1 className={styles.title}>Iniciar Sesión</h1>
           <p className={styles.subtitle}>Ingresá tu email y contraseña para continuar</p>
 

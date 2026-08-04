@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import Button from '@/components/ui/Button/Button'
+import Avatar from '@/components/ui/Avatar/Avatar'
 import Modal from '@/components/blocks/Modal/Modal'
 import styles from './Home.module.css'
 import { getUsers } from '@/api/getUsers'
@@ -10,10 +11,11 @@ import type { User } from '@/api/types'
 import logoHorizontal from '@/assets/logo-horizontal.png'
 
 // Importamos los íconos desde el archivo centralizado
-import { EyeIcon, EditIcon, TrashIcon, SearchIcon } from '../../components/ui/Icons/Icons'
+import { EyeIcon, EditIcon, TrashIcon, SearchIcon } from '@/components/ui/Icons/Icons'
 
 import UserDetails from './components/UserDetails'
 import UserEditForm from './components/UserEditForm'
+import DeleteReasonForm from './components/DeleteReasonForm'
 
 function Home() {
   const navigate = useNavigate()
@@ -22,8 +24,9 @@ function Home() {
   const [loading, setLoading] = useState(true)
 
   const [modalUser, setModalUser] = useState<User | null>(null)
-  const [modalMode, setModalMode] = useState<'view' | 'edit' | null>(null)
-  
+  const [modalMode, setModalMode] = useState<'view' | 'edit' | 'delete' | null>(null)
+  const [deleting, setDeleting] = useState(false)
+
   const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
@@ -63,55 +66,40 @@ function Home() {
     setModalMode('edit')
   }
 
+  function openDelete(user: User) {
+    setModalUser(user)
+    setModalMode('delete')
+  }
+
   function closeModal() {
     setModalMode(null)
     setModalUser(null)
   }
 
-  function handleUserUpdated(updated: User | any) {
-    const updatedUser = updated?.data ? updated.data : updated
-
+  function handleUserUpdated(updatedUser: User) {
     setUsers((prev) =>
-      prev.map((u) => {
-        const updatedId = updatedUser._id || updatedUser.id
-        if (u._id === updatedId) {
-          return {
-            ...u,
-            ...updatedUser,
-            _id: u._id,
-          }
-        }
-        return u
-      })
+      prev.map((u) => (u._id === updatedUser._id ? { ...u, ...updatedUser } : u))
     )
-    
+
     closeModal()
     toast.success('Cambios guardados.')
   }
 
-  async function handleDelete(user: User) {
-    // Solicitamos el motivo para el registro de auditoría
-    const motivo = window.prompt(
-      `Estás por eliminar al usuario ${user.nombre} ${user.apellido}.\n\nPor favor, ingresá el motivo de la eliminación para el registro de auditoría:`
-    )
+  async function handleDeleteConfirm(motivo: string) {
+    if (!modalUser) return
 
-    // Si el administrador cancela el prompt, abortamos la función
-    if (motivo === null) return
-
-    // Validamos que el administrador no envíe un string vacío o con solo espacios
-    if (motivo.trim() === '') {
-      toast.error('Operación cancelada: Debes ingresar un motivo válido para eliminar al usuario.')
-      return
-    }
-
+    setDeleting(true)
     try {
       // Pasamos el id del usuario y el motivo a nuestra API actualizada
-      await deleteUser(user._id, motivo)
-      
-      setUsers((prev) => prev.filter((u) => u._id !== user._id))
+      await deleteUser(modalUser._id, motivo)
+
+      setUsers((prev) => prev.filter((u) => u._id !== modalUser._id))
       toast.success('Usuario eliminado y auditado con éxito.')
+      closeModal()
     } catch (err) {
       // El error lo ataja e informa apiClient automáticamente
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -133,8 +121,8 @@ function Home() {
       {/* HEADER CON TÍTULO, LOGO CENTRADO Y ACCIONES */}
       <div className={styles.header}>
         <div className={styles.headerBrand}>
-          <h1 className={styles.title}>LP Gestion</h1>
-          <p className={styles.subtitle}>Gestión usuarios</p>
+          <h1 className={styles.title}>LP Gestión</h1>
+          <p className={styles.subtitle}>Portal de autogestión — Maderera Los Pinos SRL</p>
         </div>
 
         <div className={styles.logoContainer}>
@@ -198,10 +186,11 @@ function Home() {
                 <tr key={user._id} className={styles.tr}>
                   <td className={styles.td}>
                     <div className={styles.userCell}>
-                      <img
-                        className={styles.avatar}
-                        src={`https://ui-avatars.com/api/?name=${user.nombre}+${user.apellido}&background=random`}
-                        alt={`${user.nombre} ${user.apellido}`}
+                      <Avatar
+                        nombre={user.nombre}
+                        apellido={user.apellido}
+                        role={user.role}
+                        genero={user.genero}
                       />
                       <span>
                         {user.nombre} {user.apellido}
@@ -248,7 +237,7 @@ function Home() {
                       {isManager && (
                         <button
                           className={`${styles.actionBtn} ${styles.actionBtnDelete}`}
-                          onClick={() => handleDelete(user)}
+                          onClick={() => openDelete(user)}
                           title="Eliminar usuario"
                           aria-label="Eliminar usuario"
                         >
@@ -267,11 +256,25 @@ function Home() {
       <Modal
         isOpen={modalMode !== null}
         onClose={closeModal}
-        title={modalMode === 'view' ? 'Detalle de usuario' : 'Editar usuario'}
+        title={
+          modalMode === 'view'
+            ? 'Detalle de usuario'
+            : modalMode === 'edit'
+              ? 'Editar usuario'
+              : 'Eliminar usuario'
+        }
       >
         {modalMode === 'view' && modalUser && <UserDetails user={modalUser} />}
         {modalMode === 'edit' && modalUser && (
           <UserEditForm user={modalUser} onCancel={closeModal} onSaved={handleUserUpdated} />
+        )}
+        {modalMode === 'delete' && modalUser && (
+          <DeleteReasonForm
+            user={modalUser}
+            onCancel={closeModal}
+            onConfirm={handleDeleteConfirm}
+            loading={deleting}
+          />
         )}
       </Modal>
     </main>

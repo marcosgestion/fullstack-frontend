@@ -3,6 +3,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import styles from './Register.module.css'
 import Button from '@/components/ui/Button/Button'
+import Brand from '@/components/ui/Brand/Brand'
 import { register } from '@/api/register'
 import logoHorizontal from '@/assets/logo-horizontal.png'
 import bgVideo from '@/assets/work.mp4'
@@ -45,6 +46,7 @@ function Register() {
       {/* LADO IZQUIERDO - FORMULARIO CON ANIMACIÓN */}
       <section className={styles.left}>
         <form className={styles.form} onSubmit={handleSubmit}>
+          <Brand />
           <h1 className={styles.title}>Crear Cuenta</h1>
           <p className={styles.subtitle}>Completá tus datos para registrarte</p>
 

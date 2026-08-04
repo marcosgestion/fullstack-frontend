@@ -17,8 +17,8 @@ export async function apiClient<T = any>(endpoint: string, options: RequestInit 
     if (!response.ok || !body.success) {
       const errorMessage = body.message || 'Ocurrió un error inesperado'
 
-      // Si el token es inválido o expiró (401)
-      if (response.status === 401) {
+      // Si el token es inválido o expiró (401), pero no si es un intento de login fallido
+      if (response.status === 401 && endpoint !== '/auth/login') {
         toast.error('Sesión expirada o token inválido. Redirigiendo...')
         localStorage.removeItem('token')
         localStorage.removeItem('role')
@@ -37,8 +37,8 @@ export async function apiClient<T = any>(endpoint: string, options: RequestInit 
     }
 
     return (body.data !== undefined ? body.data : body) as T
-  } catch (error: any) {
-    if (error.name === 'TypeError') {
+  } catch (error) {
+    if (error instanceof TypeError) {
       toast.error('Error de conexión con el servidor')
     }
     throw error

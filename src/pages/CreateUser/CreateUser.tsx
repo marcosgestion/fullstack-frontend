@@ -3,6 +3,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import styles from './CreateUser.module.css'
 import Button from '@/components/ui/Button/Button'
+import Brand from '@/components/ui/Brand/Brand'
 import { createUser } from '@/api/createUser'
 import logoHorizontal from '@/assets/logo-horizontal.png'
 import depositoImg from '@/assets/deposito.jpg'
@@ -42,6 +43,7 @@ function CreateUser() {
       {/* LADO IZQUIERDO - FORMULARIO */}
       <section className={styles.left}>
         <form className={styles.form} onSubmit={handleSubmit}>
+          <Brand />
           <h1 className={styles.title}>Crear Usuario</h1>
           <p className={styles.subtitle}>Completá los datos del nuevo usuario</p>
 
@@ -108,10 +110,7 @@ function CreateUser() {
 
         <div className={styles.overlay}>
           <div className={styles.logoContainer}>
-            <div className={styles.logoContainer}>
-              <img src={logoHorizontal} alt="Logo de la empresa" className={styles.logoImage} />
-            </div>
-            <p className={styles.tagline}></p>
+            <img src={logoHorizontal} alt="Logo de la empresa" className={styles.logoImage} />
           </div>
         </div>
       </section>
