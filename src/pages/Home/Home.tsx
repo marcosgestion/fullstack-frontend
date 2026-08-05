@@ -190,7 +190,6 @@ function Home() {
                         nombre={user.nombre}
                         apellido={user.apellido}
                         role={user.role}
-                        genero={user.genero}
                       />
                       <span>
                         {user.nombre} {user.apellido}

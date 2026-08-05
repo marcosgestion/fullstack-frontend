@@ -7,30 +7,23 @@ const ROLE_CLASSNAME: Record<string, string> = {
   GUEST: styles.avatar__guest,
 }
 
-const GENERO_ICON: Record<string, string> = {
-  Mujer: '💄',
-  Hombre: '🥷',
-}
-
 interface AvatarProps {
   nombre: string
   apellido: string
   role: string
-  genero: string
 }
 
-function Avatar({ nombre, apellido, role, genero }: AvatarProps) {
+function Avatar({ nombre, apellido, role }: AvatarProps) {
   const roleClassName = ROLE_CLASSNAME[role] ?? styles.avatar__guest
-  const icon = GENERO_ICON[genero] ?? '👽'
+  const initials = `${nombre[0] ?? ''}${apellido[0] ?? ''}`.toUpperCase()
 
   return (
     <div
       className={`${styles.avatar} ${roleClassName}`}
       role="img"
       aria-label={`Avatar de ${nombre} ${apellido}`}
-      title={genero}
     >
-      {icon}
+      {initials}
     </div>
   )
 }
