@@ -2,7 +2,7 @@
 
 Interfaz web del sistema **LP Gestión**, desarrollada con React, TypeScript y Vite. Se conecta a una API REST propia para mostrar, buscar, editar y auditar usuarios según el rol que tenga cada uno dentro del sistema. Es el punto de partida de un proyecto más grande: un portal de autogestión para Maderera Los Pinos SRL.
 
-Este proyecto parte de una base de código entregada por la cátedra, con la arquitectura general (React + Vite + TypeScript, estructura de carpetas, cliente HTTP, sistema de roles) ya definida. El trabajo propio consistió en corregir errores, completar funcionalidad faltante, reforzar la seguridad y prolijidad del código, y sumar algunas mejoras de interfaz — con apoyo de una herramienta de inteligencia artificial durante el desarrollo.
+Este proyecto parte de una base de código entregada por la cátedra, con la arquitectura general (React + Vite + TypeScript, estructura de carpetas, cliente HTTP, sistema de roles) ya definida. El trabajo propio consistió en corregir errores, completar funcionalidad faltante, reforzar la seguridad y prolijidad del código, y sumar algunas mejoras de interfaz.
 
 ---
 
