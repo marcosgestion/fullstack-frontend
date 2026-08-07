@@ -295,6 +295,13 @@
 }
 .input:focus, .select:focus { border-color: #a3d920; }
 
+/* Sin esto, el navegador renderiza la lista desplegable nativa con su
+   propio fondo por defecto, dejando el texto claro casi invisible. */
+.select option {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
 .modalActions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
 
 /* ============================================================
